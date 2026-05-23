@@ -77,7 +77,7 @@ void main(List<String> arguments) async {
     }
 
     // API 👇 NEW FIXED PART
-    else if (subCommand?.name == 'api') {
+    else if (subCommand.name == 'api') {
       await makeApi(
         projectName: subCommand.rest.isNotEmpty
             ? subCommand.rest.first
