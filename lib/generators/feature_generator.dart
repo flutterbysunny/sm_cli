@@ -14,25 +14,25 @@ void generateFeature({
   required String projectName,
   required String featureName,
 }) {
-  final stateManagement = ConfigService.readStateManagement(projectName);
+  // Auto detect — agar user project folder ke andar hai
+  final insideProject = Directory('lib').existsSync() &&
+      Directory('lib/features').existsSync();
+  final resolvedProject = insideProject ? '.' : projectName;
+
+  final stateManagement = ConfigService.readStateManagement(resolvedProject);
 
   final folders = [
-    // DATA
     'lib/features/$featureName/data/datasource',
     'lib/features/$featureName/data/models',
     'lib/features/$featureName/data/repository',
-
-    // DOMAIN
     'lib/features/$featureName/domain/entities',
     'lib/features/$featureName/domain/repository',
     'lib/features/$featureName/domain/usecases',
-
-    // PRESENTATION - common
-    'lib/features/$featureName/presentation/screens',
+    if (stateManagement != 'GetX')
+      'lib/features/$featureName/presentation/screens',
     'lib/features/$featureName/presentation/widgets',
   ];
 
-  // State management ke hisaab se extra folders
   if (stateManagement == 'Bloc') {
     folders.add('lib/features/$featureName/presentation/bloc');
   } else if (stateManagement == 'GetX') {
@@ -40,22 +40,21 @@ void generateFeature({
     folders.add('lib/features/$featureName/presentation/bindings');
     folders.add('lib/features/$featureName/presentation/views');
   } else {
-    // Riverpod & Provider
     folders.add('lib/features/$featureName/presentation/providers');
   }
 
   for (final folder in folders) {
-    Directory('$projectName/$folder').createSync(recursive: true);
+    Directory('$resolvedProject/$folder').createSync(recursive: true);
   }
 
   createFeatureFiles(
-    projectName: projectName,
+    projectName: resolvedProject,
     featureName: featureName,
     stateManagement: stateManagement,
   );
 
-  addRouteConstant(projectName: projectName, featureName: featureName);
-  addRoute(projectName: projectName, featureName: featureName);
+  addRouteConstant(projectName: resolvedProject, featureName: featureName);
+  addRoute(projectName: resolvedProject, featureName: featureName);
 
   print('✅ Feature "$featureName" generated ($stateManagement)');
 }

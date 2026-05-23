@@ -20,5 +20,11 @@ All notable changes to SM CLI will be documented here.
 - `--help` and `--version` flags
 - Direct flags — `--riverpod`, `--bloc`, `--getx`, `--provider`
 
+
 ### Fixed
 - Removed unused calculate() function from lib/sm_cli.dart
+
+## [1.0.2] - 2026-05-23
+
+### Fixed
+- `sm make feature` now works from inside project folder as well
