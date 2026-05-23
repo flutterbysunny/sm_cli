@@ -5,6 +5,7 @@ String selectStateManagement() {
     'Riverpod',
     'Bloc',
     'GetX',
+    'Provider',
   ];
 
   final selected = Select(

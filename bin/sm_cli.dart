@@ -9,54 +9,98 @@ void main(List<String> arguments) async {
 
   // INIT COMMAND
   final initCommand = ArgParser()
-    ..addFlag('riverpod', abbr: 'r')
-    ..addFlag('bloc', abbr: 'b')
-    ..addFlag('getx', abbr: 'g');
+    ..addFlag('riverpod', abbr: 'r', negatable: false)
+    ..addFlag('bloc', abbr: 'b', negatable: false)
+    ..addFlag('getx', abbr: 'g', negatable: false)
+    ..addFlag('provider', abbr: 'p', negatable: false);
 
   parser.addCommand('init', initCommand);
 
   // MAKE COMMAND
   final makeFeatureCommand = ArgParser();
-  final makeApiCommand = ArgParser(); // 👈 FIXED HERE
+  final makeApiCommand = ArgParser();
 
   final makeCommand = ArgParser()
     ..addCommand('feature', makeFeatureCommand)
-    ..addCommand('api', makeApiCommand); // 👈 FIXED HERE
+    ..addCommand('api', makeApiCommand);
 
   parser.addCommand('make', makeCommand);
 
-  final results = parser.parse(arguments);
+  // HELP
+  parser.addFlag('help', abbr: 'h', negatable: false, help: 'Show help');
+  parser.addFlag('version', abbr: 'v', negatable: false, help: 'Show version');
 
-  // INIT
+  ArgResults results;
+  try {
+    results = parser.parse(arguments);
+  } catch (e) {
+    print('❌ $e');
+    _printHelp();
+    return;
+  }
+
+  if (results['help'] == true || arguments.isEmpty) {
+    _printHelp();
+    return;
+  }
+
+  if (results['version'] == true) {
+    print('sm_cli version 1.0.0-dev.1');
+    return;
+  }
+
+  // ---- INIT ----
   if (results.command?.name == 'init') {
     final command = results.command!;
 
     if (command.rest.isEmpty) {
       print('❌ Please provide project name');
+      print('   Usage: sm init <project_name>');
       return;
     }
 
     final projectName = command.rest.first;
 
-    final selected = selectStateManagement();
+    // Flag se state management select karo, warna interactive prompt
+    bool riverpod = command['riverpod'] as bool;
+    bool bloc = command['bloc'] as bool;
+    bool getx = command['getx'] as bool;
+    bool provider = command['provider'] as bool;
 
-    enableGoRouter();
-    enableTheme();
+    String selected;
+    if (riverpod) {
+      selected = 'Riverpod';
+    } else if (bloc) {
+      selected = 'Bloc';
+    } else if (getx) {
+      selected = 'GetX';
+    } else if (provider) {
+      selected = 'Provider';
+    } else {
+      selected = selectStateManagement();
+    }
+
+    final useGoRouter = enableGoRouter();
+    final useTheme = enableTheme();
 
     await initProject(
       projectName: projectName,
       riverpod: selected == 'Riverpod',
       bloc: selected == 'Bloc',
       getx: selected == 'GetX',
+      useGoRouter: useGoRouter,
+      useTheme: useTheme,
     );
   }
 
-  // MAKE
+  // ---- MAKE ----
   else if (results.command?.name == 'make') {
     final subCommand = results.command!.command;
 
     if (subCommand == null) {
-      print('❌ Please provide sub command (feature/api)');
+      print('❌ Please provide sub command');
+      print('   Usage: sm make feature <project> <feature>');
+      print('          sm make api <project>');
       return;
     }
 
@@ -64,6 +108,7 @@ void main(List<String> arguments) async {
     if (subCommand.name == 'feature') {
       if (subCommand.rest.length < 2) {
         print('❌ Please provide project name and feature name');
+        print('   Usage: sm make feature <project_name> <feature_name>');
         return;
       }
 
@@ -76,15 +121,49 @@ void main(List<String> arguments) async {
       );
     }
 
-    // API 👇 NEW FIXED PART
+    // API
     else if (subCommand.name == 'api') {
-      await makeApi(
-        projectName: subCommand.rest.isNotEmpty
-            ? subCommand.rest.first
-            : 'my_first_app',
-      );
+      if (subCommand.rest.isEmpty) {
+        print('❌ Please provide project name');
+        print('   Usage: sm make api <project_name>');
+        return;
+      }
+
+      await makeApi(projectName: subCommand.rest.first);
     }
-  } else {
-    print('👋 Welcome to SM CLI');
+
+    else {
+      print('❌ Unknown sub command: ${subCommand.name}');
+      _printHelp();
+    }
   }
+
+  else {
+    _printHelp();
+  }
+}
+
+void _printHelp() {
+  print('''
+🚀 SM CLI - Flutter Clean Architecture Generator
+
+Usage:
+  sm init <project_name>              Create new Flutter project
+  sm make feature <project> <name>   Generate a new feature
+  sm make api <project>              Generate API layer (Dio)
+
+Flags for init:
+  -r, --riverpod    Use Riverpod (default: interactive)
+  -b, --bloc        Use Bloc
+  -g, --getx        Use GetX
+  -p, --provider    Use Provider
+  -h, --help        Show this help
+  -v, --version     Show version
+
+Examples:
+  sm init my_app
+  sm init my_app --riverpod
+  sm make feature my_app auth
+  sm make api my_app
+''');
 }

@@ -1,33 +1,13 @@
 import 'dart:io';
 
-Future<void> makeApi({required String projectName}) async {
+Future<void> generateApi({required String projectName}) async {
   final basePath = '$projectName/lib/core/network';
-
   final interceptorPath = '$basePath/interceptors';
 
   Directory(basePath).createSync(recursive: true);
   Directory(interceptorPath).createSync(recursive: true);
 
-  // 🌐 DIO CLIENT (PRO SAFE)
-  File('$basePath/dio_client.dart').writeAsStringSync(_dioClient());
-
-  // 📡 API ENDPOINTS
-  File('$basePath/api_endpoints.dart').writeAsStringSync(_apiEndpoints());
-
-  // 📦 API RESULT WRAPPER
-  File('$basePath/response_wrapper.dart').writeAsStringSync(_responseWrapper());
-
-  // ⚠️ EXCEPTIONS
-  File('$basePath/network_exceptions.dart').writeAsStringSync(_exceptions());
-
-  // 🪵 LOGGING INTERCEPTOR
-  File('$interceptorPath/logging_interceptor.dart')
-      .writeAsStringSync(_loggingInterceptor());
-
-  print('🌐 API PRO SAFE SYSTEM GENERATED SUCCESSFULLY');
-}
-
-String _dioClient() => '''
+  File('$basePath/dio_client.dart').writeAsStringSync('''
 import 'package:dio/dio.dart';
 import 'api_endpoints.dart';
 import 'interceptors/logging_interceptor.dart';
@@ -49,22 +29,21 @@ class DioClient {
         },
       ),
     );
-
     dio.interceptors.add(LoggingInterceptor());
   }
 }
-''';
+''');
 
-String _apiEndpoints() => '''
+  File('$basePath/api_endpoints.dart').writeAsStringSync('''
 class ApiEndpoints {
   static const baseUrl = "https://api.example.com";
 
   static const login = "/login";
   static const register = "/register";
 }
-''';
+''');
 
-String _responseWrapper() => '''
+  File('$basePath/response_wrapper.dart').writeAsStringSync('''
 class ResponseWrapper<T> {
   final T? data;
   final String? error;
@@ -78,9 +57,9 @@ class ResponseWrapper<T> {
 
   bool get isSuccess => error == null;
 }
-''';
+''');
 
-String _exceptions() => '''
+  File('$basePath/network_exceptions.dart').writeAsStringSync('''
 class NetworkExceptions {
   static String handleError(dynamic error) {
     if (error is Exception) {
@@ -89,9 +68,9 @@ class NetworkExceptions {
     return "Unknown error occurred";
   }
 }
-''';
+''');
 
-String _loggingInterceptor() => '''
+  File('$interceptorPath/logging_interceptor.dart').writeAsStringSync('''
 import 'package:dio/dio.dart';
 
 class LoggingInterceptor extends Interceptor {
@@ -113,4 +92,7 @@ class LoggingInterceptor extends Interceptor {
     handler.next(err);
   }
 }
-''';
+''');
+
+  print('🌐 API layer generated successfully');
+}

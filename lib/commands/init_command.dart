@@ -3,6 +3,7 @@ import 'dart:io';
 import '../generators/folder_generator.dart';
 import '../generators/main_generator.dart';
 import '../services/flutter_service.dart';
+import '../services/config_service.dart';
 import '../generators/router_generator.dart';
 import '../generators/theme_generator.dart';
 import '../generators/routes_constant_generator.dart';
@@ -12,60 +13,84 @@ Future<void> initProject({
   required bool riverpod,
   required bool bloc,
   required bool getx,
+  bool useGoRouter = true,
+  bool useTheme = true,
 }) async {
   await createFlutterProject(projectName);
 
   createFolders(projectName);
 
-  createMainFile(projectName);
+  createMainFile(
+    projectName: projectName,
+    riverpod: riverpod,
+    bloc: bloc,
+    getx: getx,
+  );
 
-  createRouterFile(projectName);
+  if (useGoRouter) {
+    createRouterFile(projectName);
+    createRoutesFile(projectName);
+  }
 
-  createRoutesFile(projectName);
+  if (useTheme) {
+    createThemeFile(projectName);
+  }
 
-  createThemeFile(projectName);
+  // Config save karo
+  final stateManagement = riverpod
+      ? 'Riverpod'
+      : bloc
+      ? 'Bloc'
+      : getx
+      ? 'GetX'
+      : 'Provider';
+
+  ConfigService.saveConfig(
+    projectName: projectName,
+    stateManagement: stateManagement,
+  );
+
+  // Dependencies
+  final packages = <String>[];
+  if (useGoRouter) packages.add('go_router');
 
   if (riverpod) {
-    print('📦 Adding Riverpod dependencies...');
-
-    final pubResult = await Process.run(
-      'flutter',
-      [
-        'pub',
-        'add',
-        'flutter_riverpod',
-        'go_router',
-        'dio',
-      ],
-      workingDirectory: './$projectName',
-      runInShell: true,
-    );
-
-    print(pubResult.stdout);
-    print(pubResult.stderr);
-
-    print('🔥 Riverpod architecture selected');
+    print('📦 Adding Riverpod + Dio...');
+    packages.addAll(['flutter_riverpod', 'dio']);
+    await _addPackages(projectName, packages);
+    print('🔥 Riverpod architecture ready');
+  } else if (bloc) {
+    print('📦 Adding Bloc + Dio...');
+    packages.addAll(['flutter_bloc', 'equatable', 'dio']);
+    await _addPackages(projectName, packages);
+    print('🔥 Bloc architecture ready');
+  } else if (getx) {
+    print('📦 Adding GetX + Dio...');
+    packages.addAll(['get', 'dio']);
+    await _addPackages(projectName, packages);
+    print('🔥 GetX architecture ready');
+  } else {
+    print('📦 Adding Provider + Dio...');
+    packages.addAll(['provider', 'dio']);
+    await _addPackages(projectName, packages);
+    print('🔥 Provider architecture ready');
   }
 
-  if (bloc) {
-    print('📦 Adding Bloc dependencies...');
+  print('\n✅ Project "$projectName" created successfully!');
+  print('👉 cd $projectName && flutter run');
+}
 
-    await Process.run(
-      'flutter',
-      [
-        'pub',
-        'add',
-        'flutter_bloc',
-        'equatable',
-      ],
-      workingDirectory: './$projectName',
-      runInShell: true,
-    );
-
-    print('🔥 Bloc architecture selected');
-  }
-
-  if (getx) {
-    print('🔥 GetX architecture selected');
+Future<void> _addPackages(String projectName, List<String> packages) async {
+  if (packages.isEmpty) return;
+  final result = await Process.run(
+    'flutter',
+    ['pub', 'add', ...packages],
+    workingDirectory: './$projectName',
+    runInShell: true,
+  );
+  if (result.exitCode != 0) {
+    print('⚠️ ${result.stderr}');
+  } else {
+    print(result.stdout);
   }
 }
