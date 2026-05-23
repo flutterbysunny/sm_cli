@@ -1,7 +1,6 @@
 import 'package:args/args.dart';
 import 'package:sm_cli/commands/init_command.dart';
 import 'package:sm_cli/commands/make_command.dart';
-import 'package:sm_cli/generators/api_generator.dart';
 import 'package:sm_cli/services/prompt_service.dart';
 
 void main(List<String> arguments) async {
