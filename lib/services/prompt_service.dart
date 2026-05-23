@@ -1,5 +1,9 @@
 import 'package:interact/interact.dart';
 
+/// Prompts user to select state management interactively.
+///
+/// Returns one of: `'Riverpod'`, `'Bloc'`, `'GetX'`, `'Provider'`
+
 String selectStateManagement() {
   final options = [
     'Riverpod',
@@ -15,6 +19,7 @@ String selectStateManagement() {
 
   return options[selected];
 }
+/// Prompts user to enable GoRouter.
 
 bool enableGoRouter() {
   return Confirm(
@@ -22,6 +27,7 @@ bool enableGoRouter() {
     defaultValue: true,
   ).interact();
 }
+/// Prompts user to enable Theme setup.
 
 bool enableTheme() {
   return Confirm(

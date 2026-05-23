@@ -1,6 +1,15 @@
 import 'dart:io';
 import '../services/config_service.dart';
 
+/// Generates a complete feature with clean architecture structure.
+///
+/// Auto-detects state management from `.sm_cli_config`.
+/// Creates Data, Domain, and Presentation layers.
+///
+/// Example:
+/// ```bash
+/// sm make feature my_app auth
+
 void generateFeature({
   required String projectName,
   required String featureName,

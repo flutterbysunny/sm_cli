@@ -1,8 +1,11 @@
-import 'package:sm_cli/sm_cli.dart';
 import 'package:test/test.dart';
+import 'package:sm_cli/services/config_service.dart';
 
 void main() {
-  test('calculate', () {
-    expect(calculate(), 42);
+  group('ConfigService', () {
+    test('returns Riverpod as default when config not found', () {
+      final result = ConfigService.readStateManagement('non_existing_project');
+      expect(result, 'Riverpod');
+    });
   });
 }

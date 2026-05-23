@@ -1,5 +1,19 @@
 import 'dart:io';
 
+/// Generates a complete API layer using Dio for the given Flutter project.
+///
+/// Creates the following files:
+/// - `dio_client.dart` — singleton Dio instance
+/// - `api_endpoints.dart` — API endpoint constants
+/// - `response_wrapper.dart` — typed response wrapper
+/// - `network_exceptions.dart` — error handler
+/// - `interceptors/logging_interceptor.dart` — request/response logger
+///
+/// Example:
+/// ```bash
+/// sm make api my_app
+/// ```
+
 Future<void> generateApi({required String projectName}) async {
   final basePath = '$projectName/lib/core/network';
   final interceptorPath = '$basePath/interceptors';
