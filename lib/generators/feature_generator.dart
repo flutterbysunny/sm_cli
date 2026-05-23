@@ -28,8 +28,7 @@ void generateFeature({
     'lib/features/$featureName/domain/entities',
     'lib/features/$featureName/domain/repository',
     'lib/features/$featureName/domain/usecases',
-    if (stateManagement != 'GetX')
-      'lib/features/$featureName/presentation/screens',
+    'lib/features/$featureName/presentation/screens',
     'lib/features/$featureName/presentation/widgets',
   ];
 

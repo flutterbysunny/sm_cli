@@ -28,3 +28,10 @@ All notable changes to SM CLI will be documented here.
 
 ### Fixed
 - `sm make feature` now works from inside project folder as well
+
+## [1.0.3] - 2026-05-23
+
+### Fixed
+- Project name optional — `cd my_app` ke baad sirf `sm make feature auth` kaam karta hai
+- `sm make api` bhi project name ke bina kaam karta hai
+- GetX ke liye screens folder bhi generate hota hai

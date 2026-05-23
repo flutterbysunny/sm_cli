@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:args/args.dart';
 import 'package:sm_cli/commands/init_command.dart';
 import 'package:sm_cli/commands/make_command.dart';
@@ -93,26 +95,45 @@ void main(List<String> arguments) async {
   }
 
   // ---- MAKE ----
+  // MAKE
   else if (results.command?.name == 'make') {
     final subCommand = results.command!.command;
 
     if (subCommand == null) {
       print('❌ Please provide sub command');
-      print('   Usage: sm make feature <project> <feature>');
-      print('          sm make api <project>');
+      print('   Usage: sm make feature <feature_name>');
+      print('          sm make api');
       return;
     }
 
     // FEATURE
     if (subCommand.name == 'feature') {
-      if (subCommand.rest.length < 2) {
-        print('❌ Please provide project name and feature name');
-        print('   Usage: sm make feature <project_name> <feature_name>');
+      if (subCommand.rest.isEmpty) {
+        print('❌ Please provide feature name');
+        print('   Usage: sm make feature <feature_name>');
         return;
       }
 
-      final projectName = subCommand.rest[0];
-      final featureName = subCommand.rest[1];
+      // Project name optional — agar andar hai to auto detect
+      final insideProject = Directory('lib').existsSync() &&
+          Directory('lib/features').existsSync();
+
+      String projectName;
+      String featureName;
+
+      if (insideProject) {
+        // cd my_app ke baad — sirf feature name chahiye
+        featureName = subCommand.rest.first;
+        projectName = '.'; // ← yeh hona chahiye
+      } else {
+        if (subCommand.rest.length < 2) {
+          print('❌ Please provide project name and feature name');
+          print('   Usage: sm make feature <project_name> <feature_name>');
+          return;
+        }
+        projectName = subCommand.rest[0];
+        featureName = subCommand.rest[1];
+      }
 
       await makeFeature(
         projectName: projectName,
@@ -122,18 +143,23 @@ void main(List<String> arguments) async {
 
     // API
     else if (subCommand.name == 'api') {
-      if (subCommand.rest.isEmpty) {
+      // Project name optional — agar andar hai to auto detect
+      final insideProject = Directory('lib').existsSync() &&
+          Directory('lib/core').existsSync();
+
+      final projectName = insideProject
+          ? '.'
+          : subCommand.rest.isNotEmpty
+          ? subCommand.rest.first
+          : null;
+
+      if (projectName == null) {
         print('❌ Please provide project name');
         print('   Usage: sm make api <project_name>');
         return;
       }
 
-      await makeApi(projectName: subCommand.rest.first);
-    }
-
-    else {
-      print('❌ Unknown sub command: ${subCommand.name}');
-      _printHelp();
+      await makeApi(projectName: projectName);
     }
   }
 
