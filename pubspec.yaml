@@ -23,7 +23,6 @@ executables:
 dependencies:
   path: ^1.9.0
   args: ^2.7.0
-  mason: ^0.1.0-dev.57
   io: ^1.0.5
   interact: ^2.2.0
 
