@@ -8,18 +8,14 @@ import '../services/config_service.dart';
 ///
 /// Example:
 /// ```bash
-/// sm make feature my_app auth
-
+/// cd my_app
+/// sm make feature auth
+/// ```
 void generateFeature({
   required String projectName,
   required String featureName,
 }) {
-  // Auto detect — agar user project folder ke andar hai
-  final insideProject = Directory('lib').existsSync() &&
-      Directory('lib/features').existsSync();
-  final resolvedProject = insideProject ? '.' : projectName;
-
-  final stateManagement = ConfigService.readStateManagement(resolvedProject);
+  final stateManagement = ConfigService.readStateManagement(projectName);
 
   final folders = [
     'lib/features/$featureName/data/datasource',
@@ -43,17 +39,17 @@ void generateFeature({
   }
 
   for (final folder in folders) {
-    Directory('$resolvedProject/$folder').createSync(recursive: true);
+    Directory('$projectName/$folder').createSync(recursive: true);
   }
 
   createFeatureFiles(
-    projectName: resolvedProject,
+    projectName: projectName,
     featureName: featureName,
     stateManagement: stateManagement,
   );
 
-  addRouteConstant(projectName: resolvedProject, featureName: featureName);
-  addRoute(projectName: resolvedProject, featureName: featureName);
+  addRouteConstant(projectName: projectName, featureName: featureName);
+  addRoute(projectName: projectName, featureName: featureName);
 
   print('✅ Feature "$featureName" generated ($stateManagement)');
 }
@@ -105,19 +101,71 @@ class ${capitalize(featureName)}Screen extends StatelessWidget {
       .writeAsStringSync('abstract class ${capitalize(featureName)}Repository {}\n');
 
   File('$projectName/lib/features/$featureName/domain/usecases/${featureName}_usecase.dart')
-      .writeAsStringSync('class ${capitalize(featureName)}UseCase {}\n');
+      .writeAsStringSync('''
+class ${capitalize(featureName)}UseCase {
+  // final ${capitalize(featureName)}Repository repository;
+  // ${capitalize(featureName)}UseCase(this.repository);
+
+  Future<void> call() async {
+    // TODO: implement use case
+  }
+}
+''');
 
   File('$projectName/lib/features/$featureName/data/models/${featureName}_model.dart')
-      .writeAsStringSync('class ${capitalize(featureName)}Model {}\n');
+      .writeAsStringSync('''
+class ${capitalize(featureName)}Model {
+  final int id;
+  final String name;
+
+  const ${capitalize(featureName)}Model({
+    required this.id,
+    required this.name,
+  });
+
+  factory ${capitalize(featureName)}Model.fromJson(Map<String, dynamic> json) {
+    return ${capitalize(featureName)}Model(
+      id: json['id'] as int,
+      name: json['name'] as String,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+    };
+  }
+
+  @override
+  String toString() => '${capitalize(featureName)}Model(id: \$id, name: \$name)';
+}
+''');
 
   File('$projectName/lib/features/$featureName/data/datasource/${featureName}_remote_datasource.dart')
-      .writeAsStringSync('class ${capitalize(featureName)}RemoteDataSource {}\n');
+      .writeAsStringSync('''
+import 'package:dio/dio.dart';
+
+class ${capitalize(featureName)}RemoteDataSource {
+  final Dio dio;
+
+  ${capitalize(featureName)}RemoteDataSource(this.dio);
+
+  Future<void> fetch${capitalize(featureName)}() async {
+    // TODO: implement API call
+    // final response = await dio.get('/endpoint');
+  }
+}
+''');
 
   File('$projectName/lib/features/$featureName/data/repository/${featureName}_repository_impl.dart')
       .writeAsStringSync('''
 import '../../domain/repository/${featureName}_repository.dart';
 
-class ${capitalize(featureName)}RepositoryImpl implements ${capitalize(featureName)}Repository {}
+class ${capitalize(featureName)}RepositoryImpl implements ${capitalize(featureName)}Repository {
+  // final ${capitalize(featureName)}RemoteDataSource remoteDataSource;
+  // ${capitalize(featureName)}RepositoryImpl(this.remoteDataSource);
+}
 ''');
 
   print('📝 Feature files generated');
@@ -315,7 +363,10 @@ void addRoute({required String projectName, required String featureName}) {
   print('🛣️ Route added');
 }
 
-void addRouteConstant({required String projectName, required String featureName}) {
+void addRouteConstant({
+  required String projectName,
+  required String featureName,
+}) {
   final file = File('$projectName/lib/core/routes/app_routes.dart');
   final content = file.readAsStringSync();
 

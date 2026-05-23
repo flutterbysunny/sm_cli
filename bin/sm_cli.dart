@@ -46,7 +46,7 @@ void main(List<String> arguments) async {
   }
 
   if (results['version'] == true) {
-    print('sm_cli version 1.0.0-dev.1');
+    print('sm_cli version 1.0.4');
     return;
   }
 
@@ -62,7 +62,6 @@ void main(List<String> arguments) async {
 
     final projectName = command.rest.first;
 
-    // Flag se state management select karo, warna interactive prompt
     bool riverpod = command['riverpod'] as bool;
     bool bloc = command['bloc'] as bool;
     bool getx = command['getx'] as bool;
@@ -95,14 +94,13 @@ void main(List<String> arguments) async {
   }
 
   // ---- MAKE ----
-  // MAKE
   else if (results.command?.name == 'make') {
     final subCommand = results.command!.command;
 
     if (subCommand == null) {
       print('❌ Please provide sub command');
-      print('   Usage: sm make feature <feature_name>');
-      print('          sm make api');
+      print('   Usage: cd <project_name> && sm make feature <feature_name>');
+      print('          cd <project_name> && sm make api');
       return;
     }
 
@@ -110,56 +108,40 @@ void main(List<String> arguments) async {
     if (subCommand.name == 'feature') {
       if (subCommand.rest.isEmpty) {
         print('❌ Please provide feature name');
-        print('   Usage: sm make feature <feature_name>');
+        print('   Usage: cd <project_name> && sm make feature <feature_name>');
         return;
       }
 
-      // Project name optional — agar andar hai to auto detect
+      // Sirf project folder ke andar se kaam karega
       final insideProject = Directory('lib').existsSync() &&
-          Directory('lib/features').existsSync();
+          Directory('lib/features').existsSync() &&
+          File('pubspec.yaml').existsSync();
 
-      String projectName;
-      String featureName;
-
-      if (insideProject) {
-        // cd my_app ke baad — sirf feature name chahiye
-        featureName = subCommand.rest.first;
-        projectName = '.'; // ← yeh hona chahiye
-      } else {
-        if (subCommand.rest.length < 2) {
-          print('❌ Please provide project name and feature name');
-          print('   Usage: sm make feature <project_name> <feature_name>');
-          return;
-        }
-        projectName = subCommand.rest[0];
-        featureName = subCommand.rest[1];
+      if (!insideProject) {
+        print('❌ Please run this command inside your Flutter project folder');
+        print('   Usage: cd <project_name> && sm make feature <feature_name>');
+        return;
       }
 
       await makeFeature(
-        projectName: projectName,
-        featureName: featureName,
+        projectName: '.',
+        featureName: subCommand.rest.first,
       );
     }
 
     // API
     else if (subCommand.name == 'api') {
-      // Project name optional — agar andar hai to auto detect
       final insideProject = Directory('lib').existsSync() &&
-          Directory('lib/core').existsSync();
+          Directory('lib/core').existsSync() &&
+          File('pubspec.yaml').existsSync();
 
-      final projectName = insideProject
-          ? '.'
-          : subCommand.rest.isNotEmpty
-          ? subCommand.rest.first
-          : null;
-
-      if (projectName == null) {
-        print('❌ Please provide project name');
-        print('   Usage: sm make api <project_name>');
+      if (!insideProject) {
+        print('❌ Please run this command inside your Flutter project folder');
+        print('   Usage: cd <project_name> && sm make api');
         return;
       }
 
-      await makeApi(projectName: projectName);
+      await makeApi(projectName: '.');
     }
   }
 
@@ -173,9 +155,9 @@ void _printHelp() {
 🚀 SM CLI - Flutter Clean Architecture Generator
 
 Usage:
-  sm init <project_name>              Create new Flutter project
-  sm make feature <project> <name>   Generate a new feature
-  sm make api <project>              Generate API layer (Dio)
+  sm init <project_name>         Create new Flutter project
+  sm make feature <name>         Generate a new feature (run inside project)
+  sm make api                    Generate API layer (run inside project)
 
 Flags for init:
   -r, --riverpod    Use Riverpod (default: interactive)
@@ -188,7 +170,8 @@ Flags for init:
 Examples:
   sm init my_app
   sm init my_app --riverpod
-  sm make feature my_app auth
-  sm make api my_app
+  cd my_app
+  sm make feature auth
+  sm make api
 ''');
 }

@@ -4,6 +4,36 @@ All notable changes to SM CLI will be documented here.
 
 ---
 
+## [1.0.4] - 2026-05-23
+
+### Fixed
+- `sm make feature` and `sm make api` now only work inside the project folder — clear error message shown when run from outside
+- Feature name now generates correctly
+
+### Improved
+- `model` now auto-generates `fromJson` and `toJson` methods
+- `usecase` now auto-generates `call()` method
+- `remote_datasource` now auto-generates basic structure with Dio
+- `repository_impl` now includes commented hints for implementation
+
+---
+
+## [1.0.3] - 2026-05-23
+
+### Fixed
+- Project name is now optional — after `cd my_app`, just run `sm make feature auth`
+- `sm make api` works without project name as well
+- GetX now correctly generates `screens` folder
+
+---
+
+## [1.0.2] - 2026-05-23
+
+### Fixed
+- `sm make feature` now works from inside the project folder
+
+---
+
 ## [1.0.1] - 2026-05-23
 
 ### Added
@@ -20,18 +50,5 @@ All notable changes to SM CLI will be documented here.
 - `--help` and `--version` flags
 - Direct flags — `--riverpod`, `--bloc`, `--getx`, `--provider`
 
-
 ### Fixed
-- Removed unused calculate() function from lib/sm_cli.dart
-
-## [1.0.2] - 2026-05-23
-
-### Fixed
-- `sm make feature` now works from inside project folder as well
-
-## [1.0.3] - 2026-05-23
-
-### Fixed
-- Project name optional — `cd my_app` ke baad sirf `sm make feature auth` kaam karta hai
-- `sm make api` bhi project name ke bina kaam karta hai
-- GetX ke liye screens folder bhi generate hota hai
+- Removed unused `calculate()` function from `lib/sm_cli.dart`
