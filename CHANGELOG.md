@@ -4,7 +4,7 @@ All notable changes to SM CLI will be documented here.
 
 ---
 
-## [1.0.0] - 2026-05-23
+## [1.0.1] - 2026-05-23
 
 ### Added
 - Flutter project initializer with clean architecture
@@ -19,3 +19,6 @@ All notable changes to SM CLI will be documented here.
 - Project config (`.sm_cli_config`) auto saved on init
 - `--help` and `--version` flags
 - Direct flags — `--riverpod`, `--bloc`, `--getx`, `--provider`
+
+### Fixed
+- Removed unused calculate() function from lib/sm_cli.dart
