@@ -2,6 +2,17 @@
 
 All notable changes to SM CLI will be documented here.
 
+
+## [1.0.5] - 2026-05-24
+
+### Added
+- `sm list` — project mein saare features list karta hai with state management info
+- Feature name validation — sirf `snake_case` allow hoga
+- Existing feature overwrite protection — warning deta hai
+
+### Fixed
+- `sm list` command properly registered
+
 ---
 
 ## [1.0.4] - 2026-05-23

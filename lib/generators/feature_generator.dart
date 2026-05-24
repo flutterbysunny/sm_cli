@@ -15,6 +15,20 @@ void generateFeature({
   required String projectName,
   required String featureName,
 }) {
+
+  if (!RegExp(r'^[a-z][a-z0-9_]*$').hasMatch(featureName)) {
+    print('❌ Invalid feature name: "$featureName"');
+    print('   Use snake_case only — e.g: auth, user_profile, home_screen');
+    return;
+  }
+
+  // 2. Already exists check
+  if (Directory('$projectName/lib/features/$featureName').existsSync()) {
+    print('⚠️ Feature "$featureName" already exists!');
+    print('   Use a different name or delete the existing feature first.');
+    return;
+  }
+
   final stateManagement = ConfigService.readStateManagement(projectName);
 
   final folders = [
@@ -37,6 +51,9 @@ void generateFeature({
   } else {
     folders.add('lib/features/$featureName/presentation/providers');
   }
+
+  // 1. Feature name validation
+
 
   for (final folder in folders) {
     Directory('$projectName/$folder').createSync(recursive: true);

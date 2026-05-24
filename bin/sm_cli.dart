@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:sm_cli/commands/init_command.dart';
 import 'package:sm_cli/commands/make_command.dart';
+import 'package:sm_cli/services/config_service.dart';
 import 'package:sm_cli/services/prompt_service.dart';
 
 void main(List<String> arguments) async {
@@ -26,6 +27,8 @@ void main(List<String> arguments) async {
     ..addCommand('api', makeApiCommand);
 
   parser.addCommand('make', makeCommand);
+  parser.addCommand('list');
+
 
   // HELP
   parser.addFlag('help', abbr: 'h', negatable: false, help: 'Show help');
@@ -144,6 +147,41 @@ void main(List<String> arguments) async {
       await makeApi(projectName: '.');
     }
   }
+  // LIST
+  else if (results.command?.name == 'list') {
+    final insideProject = Directory('lib').existsSync() &&
+        Directory('lib/features').existsSync() &&
+        File('pubspec.yaml').existsSync();
+
+    if (!insideProject) {
+      print('❌ Please run this command inside your Flutter project folder');
+      print('   Usage: cd <project_name> && sm list');
+      return;
+    }
+
+    final featuresDir = Directory('lib/features');
+    final features = featuresDir
+        .listSync()
+        .whereType<Directory>()
+        .map((d) => d.path.split('/').last)
+        .toList();
+
+    if (features.isEmpty) {
+      print('📂 No features found');
+      print('   Run: sm make feature <name>');
+      return;
+    }
+
+    final stateManagement = ConfigService.readStateManagement('.');
+
+    print('📦 Project Features ($stateManagement):');
+    print('');
+    for (final feature in features) {
+      print('  ✅ $feature');
+    }
+    print('');
+    print('Total: ${features.length} feature(s)');
+  }
 
   else {
     _printHelp();
@@ -151,8 +189,11 @@ void main(List<String> arguments) async {
 }
 
 void _printHelp() {
+
   print('''
 🚀 SM CLI - Flutter Clean Architecture Generator
+
+   sm list                        List all features in project
 
 Usage:
   sm init <project_name>         Create new Flutter project
