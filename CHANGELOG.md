@@ -2,6 +2,20 @@
 
 All notable changes to SM CLI will be documented here.
 
+## [1.0.6] - 2026-05-27
+
+### Fixed
+- `sm make feature <project> <feature>` now works correctly from outside the project folder
+- Feature folder no longer created inside `features/` with project name — correct path is `features/auth/` not `features/my_app/`
+
+### Changed
+- Commands now work from outside the project folder — no need to `cd` into project
+- `sm make feature my_app auth` — project name required
+- `sm make api my_app` — project name required
+- `sm list my_app` — project name required
+
+---
+
 
 ## [1.0.5] - 2026-05-24
 

@@ -33,20 +33,23 @@ export PATH="$PATH":"$HOME/.pub-cache/bin"
 ## 🚀 Quick Start
 
 ```bash
-# 1. Create new project
+# 1. Install
+dart pub global activate sm_cli
+
+# 2. Create project
 sm init my_app
 
-# 2. Go to project
-cd my_app
-
-# 3. Generate a feature
+# 3. Generate feature
 sm make feature my_app auth
 
 # 4. Generate API layer
 sm make api my_app
 
-# 5. Run
-flutter run
+# 5. List features
+sm list my_app
+
+# 6. Run
+cd my_app && flutter run
 ```
 
 ---
@@ -54,11 +57,29 @@ flutter run
 ## 📋 Commands
 
 ### `sm init <project_name>`
-
-Creates a new Flutter project with clean architecture setup.
-
 ```bash
 sm init my_app
+sm init my_app --riverpod
+sm init my_app --bloc
+sm init my_app --getx
+sm init my_app --provider
+```
+
+### `sm make feature <project_name> <feature_name>`
+```bash
+sm make feature my_app auth
+sm make feature my_app home
+sm make feature my_app profile
+```
+
+### `sm make api <project_name>`
+```bash
+sm make api my_app
+```
+
+### `sm list <project_name>`
+```bash
+sm list my_app
 ```
 
 Prompts:
