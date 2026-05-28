@@ -2,6 +2,22 @@
 
 All notable changes to SM CLI will be documented here.
 
+## [1.0.8] - 2026-05-28
+
+### Added
+- Multiple features generate in one command
+  `sm make feature my_app auth home profile`
+
+## [1.0.7] - 2026-05-27
+
+### Added
+- `sm remove feature <project> <feature>` — feature delete with auto route cleanup
+- `sm remove feature <project> <feature> --force` — skip confirmation
+- `sm list` now shows file count per feature
+
+### Improved
+- Better `sm init` output — next steps clearly shown after project creation
+
 ## [1.0.6] - 2026-05-27
 
 ### Fixed

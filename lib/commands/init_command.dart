@@ -76,9 +76,19 @@ Future<void> initProject({
     print('🔥 Provider architecture ready');
   }
 
+  // ← Yahan hona chahiye — _addPackages ke bahar
   print('\n✅ Project "$projectName" created successfully!');
-  print('👉 cd $projectName && flutter run');
+  print('');
+  print('📋 Next steps:');
+  print('   sm make feature $projectName auth');
+  print('   sm make feature $projectName home');
+  print('   sm make api $projectName');
+  print('   cd $projectName && flutter run');
+  print('');
+  print('📖 Docs: https://pub.dev/packages/sm_cli');
 }
+
+
 
 Future<void> _addPackages(String projectName, List<String> packages) async {
   if (packages.isEmpty) return;

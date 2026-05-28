@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:sm_cli/commands/init_command.dart';
 import 'package:sm_cli/commands/make_command.dart';
+import 'package:sm_cli/commands/remove_command.dart';
 import 'package:sm_cli/services/config_service.dart';
 import 'package:sm_cli/services/prompt_service.dart';
 
@@ -28,6 +29,13 @@ void main(List<String> arguments) async {
 
   parser.addCommand('make', makeCommand);
 
+// REMOVE COMMAND
+  final removeFeatureCommand = ArgParser()
+    ..addFlag('force', abbr: 'f', negatable: false, help: 'Skip confirmation');
+  final removeCommand = ArgParser()
+    ..addCommand('feature', removeFeatureCommand);
+  parser.addCommand('remove', removeCommand);
+
   // LIST COMMAND
   parser.addCommand('list');
 
@@ -50,7 +58,7 @@ void main(List<String> arguments) async {
   }
 
   if (results['version'] == true) {
-    print('sm_cli version 1.0.6');
+    print('sm_cli version 1.0.7');
     return;
   }
 
@@ -117,7 +125,7 @@ void main(List<String> arguments) async {
       }
 
       final projectName = subCommand.rest[0];
-      final featureName = subCommand.rest[1];
+      final featureNames = subCommand.rest.sublist(1);
 
       if (!Directory('$projectName/lib').existsSync()) {
         print('❌ Project "$projectName" not found');
@@ -125,10 +133,12 @@ void main(List<String> arguments) async {
         return;
       }
 
-      await makeFeature(
-        projectName: projectName,
-        featureName: featureName,
-      );
+      for (final featureName in featureNames) {
+        await makeFeature(
+          projectName: projectName,
+          featureName: featureName,
+        );
+      }
     }
 
     // API
@@ -148,6 +158,40 @@ void main(List<String> arguments) async {
       }
 
       await makeApi(projectName: projectName);
+    }
+  }
+
+  // ---- REMOVE ----
+  else if (results.command?.name == 'remove') {
+    final subCommand = results.command!.command;
+
+    if (subCommand == null) {
+      print('❌ Please provide sub command');
+      print('   Usage: sm remove feature <project_name> <feature_name>');
+      return;
+    }
+
+    if (subCommand.name == 'feature') {
+      if (subCommand.rest.length < 2) {
+        print('❌ Please provide project name and feature name');
+        print('   Usage: sm remove feature <project_name> <feature_name>');
+        return;
+      }
+
+      final projectName = subCommand.rest[0];
+      final featureName = subCommand.rest[1];
+      final force = subCommand['force'] as bool;
+
+      if (!Directory('$projectName/lib').existsSync()) {
+        print('❌ Project "$projectName" not found');
+        return;
+      }
+
+      await removeFeature(
+        projectName: projectName,
+        featureName: featureName,
+        force: force,
+      );
     }
   }
 
@@ -184,7 +228,12 @@ void main(List<String> arguments) async {
     print('📦 $projectName Features ($stateManagement):');
     print('');
     for (final feature in features) {
-      print('  ✅ $feature');
+      final featureDir = Directory('$projectName/lib/features/$feature');
+      final fileCount = featureDir
+          .listSync(recursive: true)
+          .whereType<File>()
+          .length;
+      print('  ✅ $feature ($fileCount files)');
     }
     print('');
     print('Total: ${features.length} feature(s)');
@@ -200,10 +249,11 @@ void _printHelp() {
 🚀 SM CLI - Flutter Clean Architecture Generator
 
 Usage:
-  sm init <project_name>                    Create new Flutter project
-  sm make feature <project> <feature>       Generate a new feature
-  sm make api <project>                     Generate API layer (Dio)
-  sm list <project>                         List all features
+  sm init <project_name>                        Create new Flutter project
+  sm make feature <project> <feature>           Generate a new feature
+  sm make api <project>                         Generate API layer (Dio)
+  sm remove feature <project> <feature>         Remove a feature
+  sm list <project>                             List all features
 
 Flags for init:
   -r, --riverpod    Use Riverpod (default: interactive)
@@ -218,6 +268,7 @@ Examples:
   sm init my_app --riverpod
   sm make feature my_app auth
   sm make api my_app
+  sm remove feature my_app auth
   sm list my_app
 ''');
 }
